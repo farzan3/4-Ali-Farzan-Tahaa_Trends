@@ -102,21 +102,27 @@ class EnhancedHunterDashboard:
             st.write(f"Welcome, {user['email']}")
             st.write(f"Plan: {user['subscription_plan'].title()}")
             
-            # Pipeline control
-            st.subheader("🔧 Pipeline Control")
-            
-            pipeline_status = automated_pipeline.get_pipeline_status()
-            
-            if pipeline_status['is_running']:
-                st.success("✅ Pipeline Active")
-                if st.button("🛑 Stop Pipeline", use_container_width=True):
-                    automated_pipeline.stop_pipeline()
-                    st.rerun()
+            # Pipeline control (Admin only)
+            if auth_manager.check_role('admin'):
+                st.subheader("🔧 Pipeline Control")
+                
+                pipeline_status = automated_pipeline.get_pipeline_status()
+                
+                if pipeline_status['is_running']:
+                    st.success("✅ Pipeline Active")
+                    if st.button("🛑 Stop Pipeline", use_container_width=True):
+                        automated_pipeline.stop_pipeline()
+                        st.rerun()
+                else:
+                    st.warning("⏸️ Pipeline Stopped")
+                    if st.button("▶️ Start Pipeline", use_container_width=True):
+                        automated_pipeline.start_pipeline()
+                        st.rerun()
             else:
-                st.warning("⏸️ Pipeline Stopped")
-                if st.button("▶️ Start Pipeline", use_container_width=True):
-                    automated_pipeline.start_pipeline()
-                    st.rerun()
+                st.subheader("📊 System Status")
+                pipeline_status = automated_pipeline.get_pipeline_status()
+                status_text = "🟢 Active" if pipeline_status['is_running'] else "🔴 Inactive"
+                st.info(f"Pipeline Status: {status_text}")
             
             # Auto-refresh control
             st.subheader("🔄 Auto Refresh")
@@ -134,14 +140,17 @@ class EnhancedHunterDashboard:
             
             pages = {
                 'live_dashboard': '🔴 Live Dashboard',
-                'scraping_control': '🕷️ Scraping Control',
                 'comprehensive_analysis': '📊 Comprehensive Analysis',
                 'cross_platform': '🔀 Cross-Platform Intelligence',
                 'events_intelligence': '📅 Events Intelligence',
                 'predictions': '🔮 Success Predictions',
-                'pipeline_status': '⚙️ Pipeline Status',
                 'data_explorer': '🔍 Data Explorer'
             }
+            
+            # Admin-only pages
+            if auth_manager.check_role('admin'):
+                pages['scraping_control'] = '🕷️ Scraping Control'
+                pages['pipeline_status'] = '⚙️ Pipeline Status'
             
             for page_key, page_name in pages.items():
                 if st.button(page_name, use_container_width=True):
@@ -214,8 +223,15 @@ class EnhancedHunterDashboard:
             self.render_instant_opportunities()
     
     def render_scraping_control(self):
-        """Render scraping control interface"""
+        """Render scraping control interface (Admin only)"""
+        # Check admin access
+        if not auth_manager.check_role('admin'):
+            st.error("🔒 Access Denied: Scraping control requires admin privileges.")
+            st.info("Contact your administrator to access manual scraping controls.")
+            return
+        
         st.title("🕷️ Enhanced Scraping Control")
+        st.warning("⚠️ Admin Only: Manual scraping operations")
         
         # Scraping status overview
         st.subheader("📊 Scraping Status")
@@ -502,8 +518,15 @@ class EnhancedHunterDashboard:
             st.info("No predictions available")
     
     def render_pipeline_status(self):
-        """Render detailed pipeline status"""
+        """Render detailed pipeline status (Admin only)"""
+        # Check admin access
+        if not auth_manager.check_role('admin'):
+            st.error("🔒 Access Denied: Pipeline status requires admin privileges.")
+            st.info("Contact your administrator to access pipeline management.")
+            return
+        
         st.title("⚙️ Pipeline Status & Performance")
+        st.warning("⚠️ Admin Only: System monitoring and control")
         
         status = automated_pipeline.get_pipeline_status()
         
@@ -523,7 +546,12 @@ class EnhancedHunterDashboard:
                 st.metric("Last Analysis", "Never")
         
         with col3:
-            total_data_points = sum(status['cache_summary'].values())
+            # Calculate total data points excluding datetime fields
+            cache_summary = status['cache_summary']
+            total_data_points = sum(
+                value for key, value in cache_summary.items() 
+                if isinstance(value, (int, float)) and key != 'last_analysis'
+            )
             st.metric("Total Data Points", f"{total_data_points:,}")
         
         st.divider()

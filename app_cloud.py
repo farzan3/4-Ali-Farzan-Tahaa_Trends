@@ -115,7 +115,9 @@ class CloudHunterDashboard:
             
             user = st.session_state.get('user', {})
             st.write(f"Welcome, {user.get('email', 'User')}")
-            st.write(f"Plan: {user.get('subscription_plan', 'free').title()}")
+            plan = user.get('subscription_plan', 'free').title()
+            plan_emoji = "👑" if plan == "Premium" else "🆓"
+            st.write(f"Plan: {plan_emoji} {plan}")
             
             # Navigation menu
             st.subheader("Navigation")
@@ -123,9 +125,9 @@ class CloudHunterDashboard:
             pages = {
                 'dashboard': '📊 Dashboard',
                 'apps': '📱 App Store',
-                'steam': '🎮 Steam Games',
+                'steam': '🎮 Steam Games', 
                 'events': '📅 Events',
-                'analytics': '🔍 Analytics',
+                'analytics': '🔍 Premium Analytics',
                 'alerts': '🔔 Alerts'
             }
             
@@ -414,33 +416,78 @@ class CloudHunterDashboard:
     
     def render_analytics_page(self):
         """Render advanced analytics page"""
-        st.title("🔍 Advanced Analytics")
+        st.title("🔍 Premium Analytics Dashboard")
         
         user = st.session_state.get('user', {})
         if user.get('subscription_plan') == 'free':
-            st.warning("🔒 Advanced Analytics is available for Premium subscribers only.")
+            st.warning("🔒 Premium Analytics is available for Premium subscribers only.")
+            st.info("💡 Upgrade to unlock: Clone Detection, Sentiment Analysis, Revenue Intelligence, and more!")
             if st.button("Upgrade to Premium"):
                 st.info("This is a demo. In production, this would redirect to upgrade page.")
             return
         
-        st.subheader("Clone Detection Results (Demo)")
+        # Premium feature indicator
+        st.success("🎉 Premium Analytics Unlocked!")
         
-        clones = [
-            {"original": "PopularGame Pro", "clone": "PopGame Clone", "similarity": "94%"},
-            {"original": "Photo Editor", "clone": "Picture Edit Pro", "similarity": "87%"},
-            {"original": "Fitness Tracker", "clone": "Health Monitor", "similarity": "82%"}
-        ]
+        # Multiple analytics sections for premium users
+        tab1, tab2, tab3 = st.tabs(["🔍 Clone Detection", "📊 Sentiment Analysis", "💰 Revenue Insights"])
         
-        for clone in clones:
-            with st.container():
-                col1, col2, col3 = st.columns([2, 2, 1])
-                with col1:
-                    st.write(f"**Original:** {clone['original']}")
-                with col2:
-                    st.write(f"**Potential Clone:** {clone['clone']}")
-                with col3:
-                    st.write(f"**Similarity:** {clone['similarity']}")
-                st.divider()
+        with tab1:
+            st.subheader("AI-Powered Clone Detection")
+            
+            clones = [
+                {"original": "PopularGame Pro", "clone": "PopGame Clone", "similarity": "94%", "risk": "High"},
+                {"original": "Photo Editor", "clone": "Picture Edit Pro", "similarity": "87%", "risk": "Medium"},
+                {"original": "Fitness Tracker", "clone": "Health Monitor", "similarity": "82%", "risk": "Medium"}
+            ]
+        
+            for clone in clones:
+                with st.container():
+                    col1, col2, col3, col4 = st.columns([2, 2, 1, 1])
+                    with col1:
+                        st.write(f"**Original:** {clone['original']}")
+                    with col2:
+                        st.write(f"**Potential Clone:** {clone['clone']}")
+                    with col3:
+                        st.write(f"**Similarity:** {clone['similarity']}")
+                    with col4:
+                        risk_color = "🔴" if clone['risk'] == "High" else "🟡"
+                        st.write(f"{risk_color} {clone['risk']}")
+                    st.divider()
+        
+        with tab2:
+            st.subheader("Review Sentiment Analysis")
+            
+            sentiment_data = {
+                'App': ['SuperGame Pro', 'Fitness Tracker 2024', 'Photo Editor Max'],
+                'Positive %': [78, 85, 72],
+                'Negative %': [12, 8, 18],
+                'Neutral %': [10, 7, 10],
+                'Sentiment Score': [8.2, 8.7, 7.8]
+            }
+            
+            df = pd.DataFrame(sentiment_data)
+            st.dataframe(df, use_container_width=True)
+            
+            # Sentiment chart
+            fig = px.bar(df, x='App', y=['Positive %', 'Negative %', 'Neutral %'], 
+                        title="Review Sentiment Distribution")
+            st.plotly_chart(fig, use_container_width=True)
+        
+        with tab3:
+            st.subheader("Revenue Intelligence")
+            
+            revenue_data = {
+                'App': ['SuperGame Pro', 'Fitness Tracker 2024', 'Photo Editor Max'],
+                'Est. Daily Revenue': ['$12,500', '$8,900', '$6,700'],
+                'Revenue Trend': ['+23%', '+15%', '-5%'],
+                'Monetization': ['Freemium + IAP', 'Subscription', 'One-time + IAP']
+            }
+            
+            df = pd.DataFrame(revenue_data)
+            st.dataframe(df, use_container_width=True)
+            
+            st.info("💡 **Premium Insight:** Apps with subscription models show 40% more stable revenue growth.")
     
     def render_alerts_page(self):
         """Render alerts management page"""
