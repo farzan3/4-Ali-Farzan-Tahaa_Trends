@@ -7,7 +7,9 @@
       "Bash(copy .env.example .env)",
       "Bash(cp:*)",
       "Bash(mkdir:*)",
-      "Bash(streamlit run:*)"
+      "Bash(streamlit run:*)",
+      "Bash(pip install:*)",
+      "Bash(pip uninstall:*)"
     ],
     "deny": [],
     "ask": []

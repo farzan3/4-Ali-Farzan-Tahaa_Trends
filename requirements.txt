@@ -10,6 +10,7 @@ requests>=2.31.0
 beautifulsoup4>=4.12.0
 selenium>=4.15.0
 scrapy>=2.11.0
+app-store-scraper>=0.3.5
 
 # Data Processing
 pandas>=2.0.0

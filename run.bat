@@ -5,6 +5,7 @@ SET "VENV_DIR=.venv"
 SET "PYTHON=python"
 
 echo ========================================
+echo      🎯 Hunter App Launcher 🎯
 echo ========================================
 
 REM --- Step 1: Check Python installation
@@ -32,8 +33,8 @@ IF NOT "!PY_MAJOR!"=="3" (
     exit /b
 )
 
-IF NOT "!PY_MINOR!"=="12" (
-    echo [ERROR] Python 3.12.x is required. Found: !PY_VERSION!
+IF !PY_MINOR! LSS 8 (
+    echo [ERROR] Python 3.8+ is required. Found: !PY_VERSION!
     pause
     exit /b
 )
@@ -76,14 +77,63 @@ IF EXIST requirements.txt (
     echo [WARNING] requirements.txt not found. Skipping dependencies.
 )
 
-REM --- Step 5: Launch Streamlit app
-IF EXIST app.py (
-    echo Launching Streamlit app...
-    streamlit run app.py
+REM --- Step 5: Choose app version and launch
+echo.
+echo Choose app version to run:
+echo [1] Local Mode (app.py) - Full features with database
+echo [2] Unified Mode (app_unified.py) - Auto-detecting environment  
+echo [3] Enhanced Mode (enhanced_app.py) - Advanced pipeline features
+echo [4] Cloud Mode (app_cloud.py) - Lightweight demo version
+echo.
+SET /P choice="Enter your choice (1-4): "
+
+IF "%choice%"=="1" (
+    IF EXIST app.py (
+        echo Launching Local Mode...
+        streamlit run app.py
+    ) ELSE (
+        echo [ERROR] app.py not found.
+        pause
+        exit /b
+    )
+) ELSE IF "%choice%"=="2" (
+    IF EXIST app_unified.py (
+        echo Launching Unified Mode...
+        streamlit run app_unified.py
+    ) ELSE (
+        echo [ERROR] app_unified.py not found.
+        pause
+        exit /b
+    )
+) ELSE IF "%choice%"=="3" (
+    IF EXIST enhanced_app.py (
+        echo Launching Enhanced Mode...
+        streamlit run enhanced_app.py
+    ) ELSE (
+        echo [ERROR] enhanced_app.py not found.
+        pause
+        exit /b
+    )
+) ELSE IF "%choice%"=="4" (
+    IF EXIST app_cloud.py (
+        echo Launching Cloud Mode...
+        streamlit run app_cloud.py
+    ) ELSE (
+        echo [ERROR] app_cloud.py not found.
+        pause
+        exit /b
+    )
 ) ELSE (
-    echo [ERROR] app.py not found in current directory.
-    pause
-    exit /b
+    echo [ERROR] Invalid choice. Defaulting to Unified Mode...
+    IF EXIST app_unified.py (
+        streamlit run app_unified.py
+    ) ELSE IF EXIST app.py (
+        streamlit run app.py
+    ) ELSE (
+        echo [ERROR] No app files found.
+        pause
+        exit /b
+    )
 )
 
 pause
