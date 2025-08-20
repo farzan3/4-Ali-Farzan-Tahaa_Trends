@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cat:*)",
+      "Bash(dir)",
+      "Bash(python:*)",
+      "Bash(copy .env.example .env)",
+      "Bash(cp:*)",
+      "Bash(mkdir:*)",
+      "Bash(streamlit run:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
